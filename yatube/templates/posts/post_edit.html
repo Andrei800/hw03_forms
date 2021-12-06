@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Редактировать пост{% endblock %}
+{% block content %}
+      <div class="container py-5">
+        <div class="row justify-content-center">
+          <div class="col-md-8 p-5">
+            <div class="card">
+              <div class="card-header">       
+                Редактировать пост            
+              </div>
+              <div class="card-body">        
+                <form method="post" href="{% url 'posts:profile' user.username %}">
+                  <input type="hidden" name="csrfmiddlewaretoken" value="">            
+                  <div class="form-group row my-3 p-3">
+                    <label for="id_text">
+                      Текст поста                  
+                      <span class="required text-danger" >*</span>                  
+                    </label>
+                    <textarea name="text" cols="40" rows="10" class="form-control" required id="id_text">
+                    </textarea>                                 
+                  </div>            
+                  <div class="form-group row my-3 p-3">
+                  <label for="id_group">
+                      Group                  
+                  </label>
+                    <select name="group" class="form-control" id="id_group">
+                      <option value="" selected>---------</option>
+                      {% for curr_group in all_groups %}
+                        <option value="{{ curr_group.id }}">
+                          {{ curr_group.title }}
+                        </option>
+                      {% endfor %}
+                    </select>
+                    <small id="id_group-help" class="form-text text-muted">
+                      {% if post.group %}   
+                        <a href="{% url 'posts:group_list' post.group.slug %}">
+                          Группа, к которой будет относиться пост
+                        </a>
+                      {% endif %}
+                    </small>
+                  </div>
+                  <button type="submit" class="btn btn-primary">
+                    {% if is_edit %}
+                      Сохранить
+                    {% else %}
+                      Добавить
+                    {% endif %}               
+                  </button> 
+                  </div>
+                {% csrf_token %}
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+{% endblock %}
+
