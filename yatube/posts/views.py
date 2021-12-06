@@ -2,8 +2,10 @@ from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 from .models import Post, Group, User
-from users.forms import PostForm
+from posts.forms import PostForm
 import datetime
+from django.views.decorators.csrf import csrf_exempt
+
 
 def index(request):
     posts = Post.objects.all()[:10]
@@ -14,7 +16,7 @@ def index(request):
     page_obj = paginator.get_page(page_number)
     context = {
         'title': title,
-        'posts': posts, 
+        'posts': posts,
         'page_obj': page_obj,
     }
     return render(request, 'posts/index.html', context)
@@ -59,7 +61,7 @@ def profile(request, username):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
-        'user': user,
+        'author': user,
         'page_obj': page_obj,
         'num_of_posts': num_of_posts,
     }
@@ -67,7 +69,7 @@ def profile(request, username):
 
 
 def post_detail(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
+    post = get_object_or_404(Post, pk=post_id)
     author = post.author
     pub_date = (Post.objects.get(pk=post_id)).pub_date
     post_count = post.author.posts.count()
@@ -78,6 +80,7 @@ def post_detail(request, post_id):
         'post_count': post_count,
     }
     return render(request, 'posts/post_detail.html', context)
+
 
 @login_required
 def post_create(request):
@@ -103,6 +106,7 @@ def post_create(request):
 
 
 @login_required
+@csrf_exempt
 def post_edit(request, post_id):
     template = 'posts/post_create.html'
     template2 = 'posts:post_detail'

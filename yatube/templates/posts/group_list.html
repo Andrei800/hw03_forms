@@ -1,12 +1,12 @@
 {% extends 'base.html'%}
 
-{% block title %}
-  {{ title }}
+{% block header %}
+  {{ group.title }}
 {% endblock %}
 
 {% block content %}
   <div class="container">
-    <h1>Записи сообщества: {{ group.title }}</h1>
+    <h1>{{ group.title }}</h1>
   </div>
   <a class='navbar-brand' href='{% url 'posts:index' %}'>
   Вернуться на главную страницу
@@ -17,7 +17,7 @@
       {{ group.description }}
     </li>
     <li>
-      Автор: {{ post.author.get_full_name }}
+      Автор: {{ post.author.username }}
     </li>
     <li>
       Дата публикации: {{ post.pub_date|date:'d E Y' }}
@@ -29,6 +29,14 @@
     <p>
       <a href="{% url 'posts:post_detail' post.id %}">подробная информация
       </a>
+    </p>
+    <p>
+      {{group.description}}
+    </p>
+    <p>
+      {% if post.group %}   
+        <a href="{% url 'posts:group_list' post.group.slug %}">все записи группы</a>
+      {% endif %} 
     </p>
   {% if not forloop.last %}<hr>{% endif %}
 {% endfor %} 

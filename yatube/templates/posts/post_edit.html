@@ -9,7 +9,7 @@
                 Редактировать пост            
               </div>
               <div class="card-body">        
-                <form method="post" href="{% url 'posts:profile' user.username %}">
+                <form method="post" href="{% url 'posts:profile' author.username %}">
                   <input type="hidden" name="csrfmiddlewaretoken" value="">            
                   <div class="form-group row my-3 p-3">
                     <label for="id_text">
