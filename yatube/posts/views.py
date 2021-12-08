@@ -5,13 +5,14 @@ from .models import Post, Group, User
 from posts.forms import PostForm
 import datetime
 from django.views.decorators.csrf import csrf_exempt
+from yatube.settings import constante
 
 
 def index(request):
-    posts = Post.objects.all()[:10]
+    posts = Post.objects.all()
     title = 'Последние обновления на сайте'
     post_list = Post.objects.all()
-    paginator = Paginator(post_list, 10)
+    paginator = Paginator(post_list, constante)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
@@ -40,7 +41,7 @@ def group_list(request):
 
 def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
-    posts = group.posts.all()[:10]
+    posts = group.posts.all()
     post_list = Post.objects.all()
     paginator = Paginator(post_list, 10)
     page_number = request.GET.get('page')
@@ -71,12 +72,10 @@ def profile(request, username):
 def post_detail(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     author = post.author
-    pub_date = (Post.objects.get(pk=post_id)).pub_date
     post_count = post.author.posts.count()
     context = {
         'post': post,
         'author': author,
-        'pub_date': pub_date,
         'post_count': post_count,
     }
     return render(request, 'posts/post_detail.html', context)
@@ -85,24 +84,21 @@ def post_detail(request, post_id):
 @login_required
 def post_create(request):
     template = 'posts/post_create.html'
-    if request.method == 'POST':
+    form = PostForm(request.POST)
+    if request.method != 'POST':
         form = PostForm(request.POST)
-        if form.is_valid():
-            form = form.save(False)
-            form.author = request.user
-            form.pub_date = datetime.datetime.now()
-            form.save()
-            return redirect('posts:profile', username=form.author)
-        else:
-            context = {'form': form}
-            return render(request, template, context)
-    else:
-        form = PostForm()
-        context = {
-            'form': form,
-            'new_post': 'Новый пост'
-        }
-        return render(request, template, context)
+    if form.is_valid():
+        form = form.save(False)
+        form.author = request.user
+        form.pub_date = datetime.datetime.now()
+        form.save()
+        return redirect('posts:profile', username=form.author)
+    form = PostForm()
+    context = {
+        'form': form,
+        'new_post': 'Новый пост'
+    }
+    return render(request, template, context)
 
 
 @login_required
@@ -111,34 +107,32 @@ def post_edit(request, post_id):
     template = 'posts/post_create.html'
     template2 = 'posts:post_detail'
     post = get_object_or_404(Post, pk=post_id)
-    if post.author == request.user:
-        is_edit = True
-        if request.method == 'POST':
-            form = PostForm(request.POST, instance=post)
-            if form.is_valid():
-                post1 = form.save(commit=False)
-                post1.author = request.user
-                post1.save()
-                return redirect(template2, post_id)
-            else:
-                return render(
-                    request,
-                    template,
-                    {
-                        'post_id': post_id,
-                        'form': form,
-                        'is_edit': is_edit
-                    }
-                )
-        form = PostForm(instance=post)
-        return render(
-            request,
-            template,
-            {
-                'post_id': post_id,
-                'form': form,
-                'is_edit': is_edit
-            }
-        )
-    else:
+    if post.author != request.user:
         return redirect(template2, post_id)
+    is_edit = True
+    form = PostForm(instance=post)
+    if request.method != 'POST':
+        return render(
+        request,
+        template,
+        {
+            'post_id': post_id,
+            'form': form,
+            'is_edit': is_edit
+        }
+    )
+    form = PostForm(request.POST, instance=post)
+    if not form.is_valid():
+        return render(
+        request,
+        template,
+        {
+            'post_id': post_id,
+            'form': form,
+            'is_edit': is_edit
+        }
+    )
+    post1 = form.save(commit=False)
+    post1.author = request.user
+    post1.save()
+    return redirect(template2, post_id)
