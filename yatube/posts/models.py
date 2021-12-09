@@ -15,10 +15,10 @@ class Group(models.Model):
                             help_text='')
     description = models.TextField(verbose_name='Описание',
                                    help_text='Описание группы')
-    
+
     def __str__(self):
         return self.title
-    
+
 
 class Post(models.Model):
     text = models.TextField(verbose_name='Текст',
@@ -46,8 +46,6 @@ class Post(models.Model):
 
     class Meta:
         ordering = ('-pub_date',)
-        
 
     def __str__(self):
         return self.text[:15]
-    

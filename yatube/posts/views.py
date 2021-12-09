@@ -5,14 +5,14 @@ from .models import Post, Group, User
 from posts.forms import PostForm
 import datetime
 from django.views.decorators.csrf import csrf_exempt
-from yatube.settings import constante
+from yatube.settings import СONSTANTE
 
 
 def index(request):
     posts = Post.objects.all()
     title = 'Последние обновления на сайте'
     post_list = Post.objects.all()
-    paginator = Paginator(post_list, constante)
+    paginator = Paginator(post_list, СONSTANTE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
@@ -28,7 +28,7 @@ def group_list(request):
     title = 'Список групп'
     text = 'Информация о группах проекта Yatube'
     post_list = Post.objects.all()
-    paginator = Paginator(post_list, 10)
+    paginator = Paginator(post_list, СONSTANTE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
@@ -43,7 +43,7 @@ def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
     posts = group.posts.all()
     post_list = Post.objects.all()
-    paginator = Paginator(post_list, 10)
+    paginator = Paginator(post_list, СONSTANTE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
@@ -58,7 +58,7 @@ def profile(request, username):
     user = get_object_or_404(User, username=username)
     post_list = user.posts.all()
     num_of_posts = post_list.count()
-    paginator = Paginator(post_list, 10)
+    paginator = Paginator(post_list, СONSTANTE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
@@ -83,7 +83,7 @@ def post_detail(request, post_id):
 
 @login_required
 def post_create(request):
-    template = 'posts/post_create.html'
+    post_create_template = 'posts/post_create.html'
     form = PostForm(request.POST)
     if request.method != 'POST':
         form = PostForm(request.POST)
@@ -98,41 +98,37 @@ def post_create(request):
         'form': form,
         'new_post': 'Новый пост'
     }
-    return render(request, template, context)
+    return render(request, post_create_template, context)
 
 
 @login_required
 @csrf_exempt
 def post_edit(request, post_id):
-    template = 'posts/post_create.html'
-    template2 = 'posts:post_detail'
+    post_create_template = 'posts/post_create.html'
+    post_detail_template = 'posts:post_detail'
     post = get_object_or_404(Post, pk=post_id)
     if post.author != request.user:
-        return redirect(template2, post_id)
+        return redirect(post_detail_template, post_id)
     is_edit = True
     form = PostForm(instance=post)
     if request.method != 'POST':
         return render(
-        request,
-        template,
-        {
-            'post_id': post_id,
-            'form': form,
-            'is_edit': is_edit
-        }
-    )
+            request,
+            post_create_template,
+            {'post_id': post_id,
+             'form': form,
+             'is_edit': is_edit}
+        )
     form = PostForm(request.POST, instance=post)
     if not form.is_valid():
         return render(
-        request,
-        template,
-        {
-            'post_id': post_id,
-            'form': form,
-            'is_edit': is_edit
-        }
-    )
-    post1 = form.save(commit=False)
-    post1.author = request.user
-    post1.save()
-    return redirect(template2, post_id)
+            request,
+            post_create_template,
+            {'post_id': post_id,
+             'form': form,
+             'is_edit': is_edit}
+        )
+    form = form.save(commit=False)
+    form.author = request.user
+    form.save()
+    return redirect(post_detail_template, post_id)
