@@ -136,5 +136,4 @@ EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
 LOGIN_URL = 'users:login'
 LOGIN_REDIRECT_URL = 'posts:index'
 
-
-constante = 10
+POSTS_PER_PAGE = 10

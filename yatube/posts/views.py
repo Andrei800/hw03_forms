@@ -5,14 +5,14 @@ from .models import Post, Group, User
 from posts.forms import PostForm
 import datetime
 from django.views.decorators.csrf import csrf_exempt
-from yatube.settings import СONSTANTE
+from yatube.settings import POSTS_PER_PAGE
 
 
 def index(request):
     posts = Post.objects.all()
     title = 'Последние обновления на сайте'
     post_list = Post.objects.all()
-    paginator = Paginator(post_list, СONSTANTE)
+    paginator = Paginator(post_list, POSTS_PER_PAGE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
@@ -28,7 +28,7 @@ def group_list(request):
     title = 'Список групп'
     text = 'Информация о группах проекта Yatube'
     post_list = Post.objects.all()
-    paginator = Paginator(post_list, СONSTANTE)
+    paginator = Paginator(post_list, POSTS_PER_PAGE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
@@ -43,7 +43,7 @@ def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
     posts = group.posts.all()
     post_list = Post.objects.all()
-    paginator = Paginator(post_list, СONSTANTE)
+    paginator = Paginator(post_list, POSTS_PER_PAGE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
@@ -58,7 +58,7 @@ def profile(request, username):
     user = get_object_or_404(User, username=username)
     post_list = user.posts.all()
     num_of_posts = post_list.count()
-    paginator = Paginator(post_list, СONSTANTE)
+    paginator = Paginator(post_list, POSTS_PER_PAGE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
